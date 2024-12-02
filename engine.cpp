@@ -7,14 +7,15 @@
 #include <SDL2/SDL_video.h>
 #include <cmath>
 
-bool Engine::init() {
+bool Engine::init(unsigned int width, unsigned int height) 
+{
     if ( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) ) 
     {
         logger::logErr("Failed to initialize SDL. Error: ", SDL_GetError());
         return false;
     }
 
-    window = SDL_CreateWindow("SDLario", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow("SDLario", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
     if ( !window ) 
     {
         logger::logErr("Failed to create window. Error: ", SDL_GetError());
@@ -35,8 +36,7 @@ bool Engine::init() {
         return false;
     }
 
-    viewport = { 0, 0, 320, 240 };
-    viewportRatio = (float) viewport.w / viewport.h;
+    resizeViewport(width, height);
 
     SDL_ShowWindow(window);
     return true;
@@ -51,22 +51,7 @@ bool Engine::loop() {
             case SDL_WINDOWEVENT: switch (event.window.event) {
                 case SDL_WINDOWEVENT_CLOSE: return false;
                 case SDL_WINDOWEVENT_RESIZED:
-                    float aspectRatio = (float) event.window.data1 / event.window.data2;
-                    logger::log(aspectRatio, " ", viewportRatio);
-                    if (aspectRatio >= viewportRatio) {
-                        viewport.h = event.window.data2;
-                        viewport.w = ceilf(event.window.data2 * viewportRatio);
-                        
-                        viewport.y = 0;
-                        viewport.x = ceilf((float) (event.window.data1 - viewport.w) / 2);
-                    }
-                    else {
-                        viewport.w = event.window.data1;
-                        viewport.h = ceilf(event.window.data1 / viewportRatio);
-
-                        viewport.x = 0;
-                        viewport.y = ceilf((float) (event.window.data2 - viewport.h) / 2);
-                    }
+                    resizeViewport(event.window.data1, event.window.data2);
                     break;
             }
         }
@@ -80,6 +65,24 @@ bool Engine::loop() {
     SDL_RenderPresent( renderer );
 
     return true;
+}
+
+void Engine::resizeViewport(int width, int height) {
+    float aspectRatio = (float) width / height;
+    if (aspectRatio >= viewportRatio) {
+        viewport.h = height;
+        viewport.w = ceilf(height * viewportRatio);
+        
+        viewport.y = 0;
+        viewport.x = ceilf((float) (width - viewport.w) / 2);
+    }
+    else {
+        viewport.w = width;
+        viewport.h = ceilf(width / viewportRatio);
+
+        viewport.x = 0;
+        viewport.y = ceilf((float) (height - viewport.h) / 2);
+    }
 }
 
 Engine::~Engine() { SDL_Quit(); }

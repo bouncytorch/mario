@@ -4,6 +4,6 @@
 
 int main() {
     Engine engine;
-    if ( !engine.init() ) return 1;
-    while ( engine.loop() ) { SDL_Delay(10); };
+    if ( !engine.init(640, 480) ) return 1;
+    while ( engine.loop() );
 }

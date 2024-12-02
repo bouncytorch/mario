@@ -3,8 +3,9 @@
 
 class Engine {
 public:
-    bool init();
+    bool init(unsigned int width, unsigned int height);
     bool loop();
+    void resizeViewport(int width, int height);
     ~Engine();
 private:
     SDL_Window* window;
@@ -12,7 +13,7 @@ private:
     SDL_Surface* surface;
 
     SDL_Rect viewport;
-    float viewportRatio;
+    float viewportRatio = 1.33333;
 
     SDL_Event event;
 };
