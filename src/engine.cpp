@@ -4,10 +4,12 @@
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
+#include <SDL2/SDL_image.h>
 #include <cmath>
 
-bool Engine::init(unsigned int width, unsigned int height) 
+bool Engine::init() 
 {
     if ( SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) ) 
     {
@@ -15,14 +17,14 @@ bool Engine::init(unsigned int width, unsigned int height)
         return false;
     }
 
-    window = SDL_CreateWindow("SDLario", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
+    window = SDL_CreateWindow("SDLario", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
     if ( !window ) 
     {
         logger::logErr("Failed to create window. Error: ", SDL_GetError());
         return false;
     }
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if ( !renderer ) 
     {
         logger::logErr("Failed to create renderer. Error: ", SDL_GetError());
@@ -36,13 +38,14 @@ bool Engine::init(unsigned int width, unsigned int height)
         return false;
     }
 
-    resizeViewport(width, height);
-
     SDL_ShowWindow(window);
     return true;
 }
 
-bool Engine::loop() {
+bool Engine::loop() 
+{
+    Uint64 start = SDL_GetPerformanceCounter();
+
     while( SDL_PollEvent(&event) ) 
         switch (event.type) {
             case SDL_QUIT: 
@@ -55,7 +58,20 @@ bool Engine::loop() {
                     break;
             }
         }
-    
+
+    render();
+    delay(start);
+    return true;
+}
+
+void Engine::delay(Uint64& start) {
+    Uint64 end = SDL_GetPerformanceCounter();
+    float elapsed = (end - start) / (float)SDL_GetPerformanceFrequency();
+    int delay = (int) (1000 / (settings.fps_max - 28)) - elapsed * 1000.0f;
+    if (delay > 0) SDL_Delay(delay);
+}
+
+void Engine::render() {
     SDL_RenderClear( renderer );
 
     SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
@@ -63,11 +79,10 @@ bool Engine::loop() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 
     SDL_RenderPresent( renderer );
-
-    return true;
 }
 
-void Engine::resizeViewport(int width, int height) {
+void Engine::resizeViewport(unsigned short width, unsigned short height) 
+{
     float aspectRatio = (float) width / height;
     if (aspectRatio >= viewportRatio) {
         viewport.h = height;
@@ -85,4 +100,6 @@ void Engine::resizeViewport(int width, int height) {
     }
 }
 
-Engine::~Engine() { SDL_Quit(); }
+Engine::~Engine() { 
+    SDL_Quit(); 
+}
