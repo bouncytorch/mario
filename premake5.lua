@@ -28,5 +28,4 @@ project "mario"
     files { "src/**.cpp" }
     targetdir "build/%{cfg.platform}_%{cfg.buildcfg}"
     objdir "build/%{cfg.platform}_%{cfg.buildcfg}/obj"
-    includedirs { "./third-party/include" }
     links { "SDL2" }
