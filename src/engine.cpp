@@ -1,6 +1,6 @@
 #include "engine.h"
+#include "SDL.h"
 #include "logger.h"
-#include <SDL.h>
 #include <cmath>
 
 bool Engine::init() 
@@ -25,12 +25,7 @@ bool Engine::init()
         return false;
     }
 
-    surface = SDL_GetWindowSurface(window);
-    if ( !surface ) 
-    {
-        logger::logErr("Failed to load window surface. Error: ", SDL_GetError());
-        return false;
-    }
+    temp = Object::load(renderer, viewport, "world.bmp");
 
     SDL_ShowWindow(window);
     return true;
@@ -40,6 +35,21 @@ bool Engine::loop()
 {
     Uint64 start = SDL_GetPerformanceCounter();
 
+    if ( !events() ) return false;
+    render();
+
+    delay(start);
+    return true;
+}
+
+void Engine::delay(Uint64& start) {
+    Uint64 end = SDL_GetPerformanceCounter();
+    float elapsed = (end - start) / (float) SDL_GetPerformanceFrequency();
+    int delay = (int) (1000 / (settings.fps_max - 28)) - elapsed * 1000.0f;
+    if (delay > 0) SDL_Delay(delay);
+}
+
+bool Engine::events() {
     while( SDL_PollEvent(&event) ) 
         switch (event.type) {
             case SDL_QUIT: 
@@ -48,31 +58,23 @@ bool Engine::loop()
             case SDL_WINDOWEVENT: switch (event.window.event) {
                 case SDL_WINDOWEVENT_CLOSE: return false;
                 case SDL_WINDOWEVENT_RESIZED:
+                    logger::logInfo("EVENTS: Window resized to ", event.window.data1, 'x', event.window.data2);
                     resizeViewport(event.window.data1, event.window.data2);
                     break;
             }
         }
 
-    render();
-    
-
-    delay(start);
     return true;
-}
-
-void Engine::delay(Uint64& start) {
-    Uint64 end = SDL_GetPerformanceCounter();
-    float elapsed = (end - start) / (float)SDL_GetPerformanceFrequency();
-    int delay = (int) (1000 / (settings.fps_max - 28)) - elapsed * 1000.0f;
-    if (delay > 0) SDL_Delay(delay);
 }
 
 void Engine::render() {
     SDL_RenderClear( renderer );
 
-    SDL_SetRenderDrawColor(renderer, 30, 30, 30, 255);
-    SDL_RenderFillRect(renderer, &viewport);
+    // settings background
+    SDL_SetRenderDrawColor(renderer, map->background >> 16, (map->background >> 8) & 0xFF, map->background & 0xFF, 255);
+    SDL_RenderFillRect( renderer, &viewport );
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    temp->draw();
 
     SDL_RenderPresent( renderer );
 }
