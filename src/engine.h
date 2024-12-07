@@ -11,7 +11,8 @@ public:
     };
 
     struct Map {
-        unsigned long background = 0x5C94FC;
+        struct background { short r = 0x5C, g = 0x94, b = 0xFC; };
+        background bg;
     };
 
     bool init();
@@ -27,9 +28,11 @@ private:
     SDL_Window* window;
     SDL_Renderer* renderer;
 
-    SDL_Texture* viewportT;
-    float viewportRatio = 1.33333;
-    SDL_Rect viewport = { 0, 0, 640, 480 };
+    float viewportWidth = 256;
+    float viewportHeight = 240;
+    SDL_Texture* viewportTexture;
+    float viewportRatio = 1.066666666;
+    SDL_Rect viewport = { 0, 0, 512, 480 };
 
     SDL_Event event;
 

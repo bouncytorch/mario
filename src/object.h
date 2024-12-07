@@ -2,13 +2,15 @@
 
 class Object {
 public:
-    void move(short x, short y);
+    void move(short x = 0, short y = 0);
     void draw();
-    static Object* load(SDL_Renderer* renderer, SDL_Rect& viewport, const char* filename);
+    SDL_Rect getRect();
+
+    static Object* load(SDL_Renderer* renderer, const char* filename);
 private:
-    Object(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect rect, SDL_Rect& viewport);
+    Object(const char* filepath, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect rect);
+    const char* filepath;
     SDL_Renderer* renderer;
     SDL_Texture* texture;
     SDL_Rect rect;
-    SDL_Rect& viewport;
 };

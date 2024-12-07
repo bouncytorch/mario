@@ -4,7 +4,7 @@
 #include "SDL_render.h"
 #include "logger.h"
 
-Object* Object::load(SDL_Renderer* renderer, SDL_Rect& viewport, const char* filepath) 
+Object* Object::load(SDL_Renderer* renderer, const char* filepath) 
 {
     SDL_Texture* texture = IMG_LoadTexture(renderer, filepath);
     if ( !texture ) {
@@ -14,19 +14,23 @@ Object* Object::load(SDL_Renderer* renderer, SDL_Rect& viewport, const char* fil
 
     SDL_Rect rect = { 0, 0 };
     SDL_QueryTexture(texture, NULL, NULL, &rect.w, &rect.h);
-
     logger::logInfo("Object \"", filepath, "\" loaded. Width: ", rect.w, " Height: ", rect.h);
-    return new Object(renderer, texture, rect, viewport);
+    return new Object(filepath, renderer, texture, rect);
 }
 
-Object::Object(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect rect, SDL_Rect& viewport)
-: renderer( renderer ), texture( texture ), rect( rect ), viewport( viewport )
+Object::Object(const char* filepath, SDL_Renderer* renderer, SDL_Texture* texture, SDL_Rect rect)
+: filepath(filepath), renderer( renderer ), texture( texture ), rect( rect )
 {};
 
 void Object::draw() 
 {
-    SDL_IntersectRect(&rect, &viewport, &rect);
     SDL_RenderCopy(renderer, texture, NULL, &rect);
 }
 
-void Object::move(short x, short y) {}
+void Object::move(short x, short y) 
+{
+    rect.x += x; rect.y += y;
+    logger::logInfo("Object ", filepath, " moved to x:", rect.x, " y:", rect.y);
+}
+
+SDL_Rect Object::getRect() { return rect; }
