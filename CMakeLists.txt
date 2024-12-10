@@ -21,15 +21,15 @@ add_library(imgui
 	third-party/imgui/backends/imgui_impl_sdl3.cpp
 	third-party/imgui/backends/imgui_impl_sdlrenderer3.cpp
 )
-target_include_directories(imgui SYSTEM PUBLIC "third-party/SDL3/include" "third-party/imgui")
+target_include_directories(imgui PUBLIC "third-party/SDL3/include" "third-party/imgui")
 target_link_libraries(imgui PUBLIC SDL3::SDL3)
 
-file(GLOB MY_SOURCES "src/*.cpp" "src/*.h")
+file(GLOB_RECURSE MY_SOURCES "src/*.cpp" "src/*.h")
 add_executable(${PROJECT_NAME} ${MY_SOURCES})
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_include_directories(${PROJECT_NAME}
-	PUBLIC
+	SYSTEM PUBLIC
 	"third-party/SDL3/include"
 	"third-party/SDL3_image/include"
 	"third-party/imgui"
@@ -38,4 +38,10 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE SDL3::SDL3 SDL3_image::SDL3_image imgui
 )
 
-
+if (PROJECT_IS_TOP_LEVEL AND UNIX)
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E create_symlink
+            ${CMAKE_BINARY_DIR}/compile_commands.json
+            ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
+    )
+endif()

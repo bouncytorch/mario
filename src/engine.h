@@ -5,41 +5,42 @@
 class Engine 
 {
 public:
-    struct Settings {
-        unsigned short fps_max;
+    struct Settings {        
+        unsigned short fps_max = 165;
         struct {
-            unsigned short width;
-            unsigned short height;
+            unsigned short width = 512;
+            unsigned short height = 480;
         } resolution;
+        struct {
+            unsigned short width = 256;
+            unsigned short height = 240;
+        } viewport;
+
+        bool validate() const;
     };
 
-    // struct Stage {
-    //     char background_r = 0x5C;
-    //     char background_g = 0x94;
-    //     char background_b = 0xFC;
-    // };
+    Engine();
+    Engine(Settings settings);
+    ~Engine();
 
     bool init();
     bool loop();
-    ~Engine();
 private:
-    Settings m_settings = { 165, { 512, 480 } };
-
-    // Stage* m_stage = new Stage();
-
     SDL_Event m_event;
     SDL_Window* m_window;
     SDL_Renderer* m_renderer;
 
+    const Settings m_settings;
     struct Viewport {
-        unsigned short width = 256;
-        unsigned short height = 240;
-        float ratio = 1.066666666;
+        float ratio;
+        SDL_FRect rect;
         SDL_Texture* texture;
-        SDL_FRect rect = { 0, 0 };
 
         void resize(unsigned short width, unsigned short height);
-    } m_viewport;
+    } m_viewport = {
+        (float)m_settings.viewport.width / m_settings.viewport.height,
+        { 0, 0 }
+    };
 
     // main loop events
     bool events();

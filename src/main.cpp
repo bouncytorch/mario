@@ -1,9 +1,9 @@
 #include "engine.h"
 #include <SDL3/SDL_main.h>
 
-int main( int argc, char *argv[] ) 
+int main() 
 {
-    Engine engine;
+    Engine engine({ 1, { 1000, 500 } });
     if ( !engine.init() ) return 1;
     while ( engine.loop() );
 
@@ -12,9 +12,5 @@ int main( int argc, char *argv[] )
 
 int WinMain( int argc, char *argv[] ) 
 {
-    Engine engine;
-    if ( !engine.init() ) return 1;
-    while ( engine.loop() );
-
-    return 0;
+    return main();
 }
