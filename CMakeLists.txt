@@ -1,43 +1,28 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.25)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 project("sdlario" LANGUAGES C CXX)
 
-set(SDL_LIBC ON)
-set(SDL_VULKAN OFF)
 set(SDL_SHARED ON)
 set(SDL_STATIC OFF)
-
 set(SDL_TESTS OFF)
 set(SDL_TEST_LIBRARY OFF)
-add_subdirectory("third-party/SDL3")
-add_subdirectory("third-party/SDL3_image")
 
-add_library(imgui
-	third-party/imgui/imgui.cpp
-	third-party/imgui/imgui_draw.cpp
-	third-party/imgui/imgui_tables.cpp
-	third-party/imgui/imgui_widgets.cpp
-	third-party/imgui/backends/imgui_impl_sdl3.cpp
-	third-party/imgui/backends/imgui_impl_sdlrenderer3.cpp
-)
-target_include_directories(imgui PUBLIC "third-party/SDL3/include" "third-party/imgui")
-target_link_libraries(imgui PUBLIC SDL3::SDL3)
+option(SDLARIO_VENDORED "Use SDL3 provided in ./third-party" ON)
+if(SDLARIO_VENDORED)
+    add_subdirectory("third-party/SDL3" SYSTEM)
+	# add_subdirectory("third-party/SDL3_image" SYSTEM)
+else()
+    find_package("SDL3" REQUIRED CONFIG REQUIRED COMPONENTS "SDL3-shared")
+    # find_package("SDL3_image" REQUIRED CONFIG REQUIRED COMPONENTS "SDL3_image-shared")
+endif()
 
-file(GLOB_RECURSE MY_SOURCES "src/*.cpp" "src/*.h")
-add_executable(${PROJECT_NAME} ${MY_SOURCES})
+file(GLOB_RECURSE SDLARIO_SOURCES "src/*.cpp" "src/*.h")
+add_executable(${PROJECT_NAME} ${SDLARIO_SOURCES})
+target_link_libraries(${PROJECT_NAME} SDL3::SDL3)
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-target_include_directories(${PROJECT_NAME}
-	SYSTEM PUBLIC
-	"third-party/SDL3/include"
-	"third-party/SDL3_image/include"
-	"third-party/imgui"
-)
-target_link_libraries(${PROJECT_NAME}
-	PRIVATE SDL3::SDL3 SDL3_image::SDL3_image imgui
-)
-
+# stole this 
 if (PROJECT_IS_TOP_LEVEL AND UNIX)
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E create_symlink
