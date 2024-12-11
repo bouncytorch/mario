@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 project("sdlario" LANGUAGES C CXX)
 
@@ -12,15 +13,15 @@ set(SDL_TEST_LIBRARY OFF)
 option(SDLARIO_VENDORED "Use SDL3 provided in ./third-party" ON)
 if(SDLARIO_VENDORED)
     add_subdirectory("third-party/SDL3" SYSTEM)
-	# add_subdirectory("third-party/SDL3_image" SYSTEM)
+	add_subdirectory("third-party/SDL3_image" SYSTEM)
 else()
     find_package("SDL3" REQUIRED CONFIG REQUIRED COMPONENTS "SDL3-shared")
-    # find_package("SDL3_image" REQUIRED CONFIG REQUIRED COMPONENTS "SDL3_image-shared")
+    find_package("SDL3_image" REQUIRED CONFIG REQUIRED COMPONENTS "SDL3_image-shared")
 endif()
 
 file(GLOB_RECURSE SDLARIO_SOURCES "src/*.cpp" "src/*.h")
 add_executable(${PROJECT_NAME} ${SDLARIO_SOURCES})
-target_link_libraries(${PROJECT_NAME} SDL3::SDL3)
+target_link_libraries(${PROJECT_NAME} SDL3::SDL3 SDL3_image::SDL3_image)
 
 # stole this 
 if (PROJECT_IS_TOP_LEVEL AND UNIX)

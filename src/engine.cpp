@@ -1,6 +1,9 @@
 #include "engine.h"
 #include <SDL3/SDL_init.h>
+#include <SDL3/SDL_rect.h>
+#include <SDL3/SDL_render.h>
 #include <SDL3/SDL_timer.h>
+#include <SDL3_image/SDL_image.h>
 #include "logger.h"
 
 Engine::Engine() {}
@@ -32,6 +35,9 @@ bool Engine::Settings::validate() const
     return true;
 }
 
+// TEMP!!!
+SDL_Texture* wow;
+// TEMP!!!
 bool Engine::init() 
 {
     if (!m_settings.validate())
@@ -66,6 +72,10 @@ bool Engine::init()
         return false;
     }
 
+    // TEMP!!!
+    wow = IMG_LoadTexture(m_renderer, "mario.bmp");
+    // TEMP!!!
+
     m_viewport.resize(m_settings.resolution.width, m_settings.resolution.height);
     return true;
 }
@@ -75,6 +85,7 @@ bool Engine::loop()
     Uint64 start = SDL_GetPerformanceCounter();
 
     if ( !events() ) return false;
+    physics();
     render(start);
 
     return true;
@@ -84,7 +95,8 @@ bool Engine::events()
 {
     while( SDL_PollEvent(&m_event) ) 
     {
-        switch (m_event.type) {
+        switch (m_event.type) 
+        {
             case SDL_EVENT_QUIT: 
                 logger::log(); // just so it looks better in console
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
@@ -99,6 +111,22 @@ bool Engine::events()
     return true;
 }
 
+int dirx = 1, diry = 1;
+SDL_FRect w = { 0, 60, 16, 16 };
+void Engine::physics() 
+{
+    // TEMP!!!
+    if (w.x + w.w-2 == m_settings.viewport.width) dirx = -1;
+    else if (w.x == -2) dirx = 1;
+
+    if (w.y + w.h == m_settings.viewport.height) diry = -1;
+    else if (w.y == 0) diry = 1;
+
+    w.x += dirx;
+    w.y += diry;
+    // TEMP!!!
+}
+
 void Engine::render(Uint64& start) 
 {
     SDL_RenderClear( m_renderer );
@@ -111,6 +139,10 @@ void Engine::render(Uint64& start)
     SDL_RenderFillRect( m_renderer, NULL );
     SDL_SetRenderDrawColor(m_renderer, 0, 0, 0, 255);
 
+    //TEMP!!!
+    SDL_RenderTexture(m_renderer, wow, NULL, &w);
+    //TEMP!!!
+
     // reset render target
     SDL_SetRenderTarget(m_renderer, NULL);
     SDL_RenderTexture(m_renderer, m_viewport.texture, NULL, &m_viewport.rect);
@@ -119,7 +151,7 @@ void Engine::render(Uint64& start)
     // cap frame to fps
     Uint64 end = SDL_GetPerformanceCounter();
     float elapsed = (end - start) / (float) SDL_GetPerformanceFrequency();
-    int delay = (int) (1000 / (m_settings.fps_max - 28)) - elapsed * 1000.0f;
+    int delay = (int) (1000 / m_settings.fps_max) - elapsed * 1000.0f;
     if (delay > 0) SDL_Delay(delay);
 }
 
@@ -133,16 +165,16 @@ void Engine::Viewport::resize(unsigned short width, unsigned short height)
     float aspectRatio = (float) width / height;
     if (aspectRatio >= this->ratio) {
         this->rect.h = height;
-        this->rect.w = (height * this->ratio) + 1;
+        this->rect.w = (height * this->ratio);
         
         this->rect.y = 0;
-        this->rect.x = (width - this->rect.w) / 2 + 1;
+        this->rect.x = (width - this->rect.w) / 2;
     }
     else {
         this->rect.w = width;
-        this->rect.h = width / this->ratio + 1;
+        this->rect.h = width / this->ratio;
 
         this->rect.x = 0;
-        this->rect.y = (height - this->rect.h) / 2 + 1;
+        this->rect.y = (height - this->rect.h) / 2;
     }
 }
