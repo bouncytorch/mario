@@ -1,33 +1,37 @@
 #pragma once
 #include <iostream>
+
 namespace logger {
     template <typename... Messages> 
-    void log(Messages&&... rest) 
+    void print(Messages&&... rest) 
     {
         (std::cout << ... << rest) << "\033[0m\n";
     }
 
-    #ifdef NDEBUG
-    inline void logWarn(...) {}
-    inline void logInfo(...) {}
-    #else
     template <typename... Msgs> 
-    void logWarn(Msgs&&... msgs) 
+    void printWarn(Msgs&&... msgs) 
     {
-        log("\033[93;1m", msgs...);
+        print("\033[93;1m", msgs...);
     }
 
     template <typename... Msgs> 
-    void logInfo(Msgs&&... msgs) 
+    void printInfo(Msgs&&... msgs) 
     {
-        log("\033[92;1m", msgs...);
+        print("\033[92;1m", msgs...);
     }
-    #endif
 
     template <typename... Msgs> 
-    void logErr(Msgs&&... msgs) 
+    void printErr(Msgs&&... msgs) 
     {
-        log("\033[91;1m", msgs...);
+        print("\033[91;1m", msgs...);
     }
 }
 
+#define LOGERROR(args...) logger::printErr(args)
+#ifndef NDEBUG
+#define LOGWARN(args...) logger::printWarn(args)
+#define LOGINFO(args...) logger::printInfo(args)
+#else 
+#define LOGWARN(args...)
+#define LOGINFO(args...)
+#endif
