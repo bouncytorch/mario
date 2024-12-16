@@ -7,6 +7,7 @@
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3_image/SDL_image.h>
+#include <optional>
 #include "logger.h"
 
 // SETTINGS
@@ -73,7 +74,7 @@ Engine::Engine(Settings settings)
         return;
     }
     
-    m_viewport.texture = Texture::create(m_renderer, m_settings.viewport.width, m_settings.viewport.height);
+    m_viewport.texture.emplace(m_renderer);
     if (!m_viewport.texture)
     {
         LOGERROR("Failed to create viewport texture. Error: ", SDL_GetError());
@@ -139,7 +140,7 @@ void Engine::render(uint64_t& start)
 {
     SDL_RenderClear( m_renderer );
     // draw the following onto the viewport texture
-    m_viewport.texture->target( m_renderer );
+    m_viewport.texture->target();
 
     // draw background color
     // TODO: HARDCODED FOR NOW. When stages are added, will draw stage bg color.
@@ -149,7 +150,7 @@ void Engine::render(uint64_t& start)
 
     // reset render target and render viewport texture
     SDL_SetRenderTarget(m_renderer, nullptr);
-    m_viewport.texture->draw( m_renderer );
+    m_viewport.texture->draw();
     SDL_RenderPresent( m_renderer );
 
     // cap frame to fps
