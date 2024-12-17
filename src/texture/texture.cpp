@@ -7,11 +7,11 @@
 #include <filesystem>
 #include "../logger.h"
 
-Texture::Texture(SDL_Renderer*& renderer, float width, float height, std::optional<SDL_FRect> projection, std::optional<SDL_FRect> crop)
+Texture::Texture(SDL_Renderer* renderer, float width, float height, std::optional<SDL_FRect> projection, std::optional<SDL_FRect> crop)
 : m_renderer(renderer),
-    m_projection(projection.value_or((SDL_FRect) { 0, 0, width, height })), 
-    m_crop(crop.value_or((SDL_FRect) { 0, 0, width, height })),
-    m_texture(SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, width, height))
+    m_texture(SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, width, height)), 
+    projection(projection.value_or((SDL_FRect) { 0, 0, width, height })),
+    crop(crop.value_or((SDL_FRect) { 0, 0, width, height }))
 {
     if (!m_texture)
     {
@@ -19,7 +19,7 @@ Texture::Texture(SDL_Renderer*& renderer, float width, float height, std::option
     }
 }
 
-Texture::Texture(SDL_Renderer*& renderer, std::filesystem::path path, std::optional<SDL_FRect> projection, std::optional<SDL_FRect> crop)
+Texture::Texture(SDL_Renderer* renderer, std::filesystem::path path, std::optional<SDL_FRect> projection, std::optional<SDL_FRect> crop)
 : m_renderer(renderer),
     m_texture(IMG_LoadTexture(renderer, path.c_str()))
 {
@@ -41,30 +41,4 @@ void Texture::target() const
 { SDL_SetRenderTarget(m_renderer, m_texture); }
 
 void Texture::draw() const
-{ SDL_RenderTexture(m_renderer, m_texture, &m_crop, &m_projection); }
-
-SDL_FRect Texture::projection() const
-{ return m_projection; }
-
-void Texture::projection(std::optional<float> width, std::optional<float> height, std::optional<float> x, std::optional<float> y)
-{ 
-    m_projection = { 
-        x.value_or(m_projection.x), 
-        y.value_or(m_projection.y), 
-        width.value_or(m_projection.w), 
-        height.value_or(m_projection.h) 
-    };
-} 
-
-SDL_FRect Texture::crop() const
-{ return m_crop; }
-
-void Texture::crop(std::optional<float> width, std::optional<float> height, std::optional<float> x, std::optional<float> y)
-{ 
-    m_projection = { 
-        x.value_or(m_projection.x), 
-        y.value_or(m_projection.y), 
-        width.value_or(m_projection.w), 
-        height.value_or(m_projection.h) 
-    };
-} 
+{ SDL_RenderTexture(m_renderer, m_texture, &crop, &projection); }

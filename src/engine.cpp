@@ -22,21 +22,18 @@ Engine::Settings::operator bool() const
 void Engine::Viewport::resize(unsigned short width, unsigned short height)
 {
     float aspectRatio = (float) width / height;
-    float w, h, x, y;
     if (aspectRatio >= ratio) {
-        w = (height * ratio);
-        h = height;
-        x = (width - w) / 2;
-        y = 0;
+        texture->projection.w = (height * ratio);
+        texture->projection.h = height;
+        texture->projection.x = (width - texture->projection.w) / 2;
+        texture->projection.y = 0;
     }
     else {
-        w = width;
-        h = width / ratio;
-        x = 0;
-        y = (height - h) / 2;
+        texture->projection.w = width;
+        texture->projection.h = width / ratio;
+        texture->projection.x = 0;
+        texture->projection.y = (height - texture->projection.h) / 2;
     }
-
-    texture->projection(w, h, x, y);
 }
 
 // ENGINE
