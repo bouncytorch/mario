@@ -2,31 +2,21 @@ cmake_minimum_required(VERSION 3.25)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-project("sdlario" LANGUAGES C CXX)
+project("platformer" LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(SDL_SHARED ON)
-set(SDL_STATIC OFF)
-set(SDL_TESTS OFF)
-set(SDL_TEST_LIBRARY OFF)
-if (APPLE) 
-    enable_language(OBJC)
+if (APPLE)
     set(CMAKE_OSX_ARCHITECTURES x86_64;arm64)
 endif()
 
-option(SDLARIO_VENDORED "Use SDL3 provided in ./third-party" TRUE)
-if(SDLARIO_VENDORED)
-    add_subdirectory("third-party/SDL3" SYSTEM)
-    add_subdirectory("third-party/SDL3_image" SYSTEM)   
-else()
-    find_package("SDL3" REQUIRED CONFIG REQUIRED COMPONENTS "SDL3-shared")
-    find_package("SDL3_image" REQUIRED CONFIG REQUIRED COMPONENTS "SDL3_image-shared")
-endif()
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+
+add_subdirectory("third-party/SFML-3.0.0-rc.2" SYSTEM)
 
 file(GLOB_RECURSE SDLARIO_SOURCES "src/*.cpp" "src/*.h")
 add_executable(${PROJECT_NAME} ${SDLARIO_SOURCES})
-target_link_libraries(${PROJECT_NAME} PUBLIC SDL3::SDL3 SDL3_image::SDL3_image)
+target_link_libraries(${PROJECT_NAME} PUBLIC sfml-graphics sfml-audio)
 
 # stole this 
 if (PROJECT_IS_TOP_LEVEL AND UNIX)
